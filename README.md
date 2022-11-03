@@ -6,4 +6,5 @@ based on JavaFX graphics and was built using no libraries.
 * diagonalize matrices
 * solve matrices
 * get the determinant of a matrix
+
 and more !
