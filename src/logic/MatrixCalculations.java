@@ -23,7 +23,6 @@ public class MatrixCalculations {
         return result;
     }
 
-    // TODO: Need to add and fix row switching elementary operation - do not forget to multiply extraValue by -1
     /**
      * calculate the row echelon form of a given matrix
      * @param m represents the matrix operand
@@ -41,9 +40,20 @@ public class MatrixCalculations {
         for (int pivotRow = 0; pivotRow < result.getHeight(); pivotRow++) {
             // Step 2. Determine the leftmost non-zero column
             int leftmostNonZero = 0;
+            int newRow = -1;
             for (;leftmostNonZero < result.getWidth(); leftmostNonZero++)
-                if (isNonZeroCol(result, leftmostNonZero, pivotRow))
+                if ((newRow = isNonZeroCol(result, leftmostNonZero, pivotRow)) != -1)
                     break;
+
+            // if there are no more nonzero rows to the bottom, we are done
+            if (newRow == -1)
+                break;
+
+            if (newRow != pivotRow){
+                result = MatrixCalculations.elementaryRowOperation3(result,newRow,pivotRow);
+                result.setExtraValue(result.getExtraValue()*-1);
+            }
+
             if (leftmostNonZero == result.getWidth())
                 break;
 
@@ -66,11 +76,11 @@ public class MatrixCalculations {
     }
 
     // helper function to check if a column is nonzero from the given indices and onwards
-    private static boolean isNonZeroCol(Matrix m, int x, int y){
+    private static int isNonZeroCol(Matrix m, int x, int y){
         for (int i = y; i < m.getHeight(); i++)
             if (m.get(x,i) != 0)
-                return true;
-        return false;
+                return i;
+        return -1;
     }
 
     /**
@@ -102,6 +112,25 @@ public class MatrixCalculations {
 
         for (int x = 0; x < result.getWidth(); x++)
             result.set(x, rowToChange, result.get(x, rowToChange) + multiple * result.get(x, rowToUse));
+
+        return result;
+    }
+
+    /**
+     * operation 3 := r1 <-> r2
+     * @param m represents the matrix to perform the operation on
+     * @param r1 represents the first row to switch
+     * @param r2 represents the first row to switch
+     * @return the resulting matrix after performed operation 3
+     */
+    public static Matrix elementaryRowOperation3(Matrix m, int r1, int r2){
+        Matrix result = new Matrix(m);
+
+        for (int x = 0; x < result.getWidth(); x++) {
+            double temp = result.get(x,r1);
+            result.set(x,r1,result.get(x,r2));
+            result.set(x,r2,temp);
+        }
 
         return result;
     }
