@@ -30,6 +30,8 @@
             <ChoiceBox fx:id="_operationChoiceBox" prefWidth="150.0" />
             <TextField fx:id="_resultField" editable="false" prefHeight="25.0" promptText="Scalar Calculations" />
             <Button mnemonicParsing="false" onAction="#executeOperation" text="Execute" />
+            <Button mnemonicParsing="false" onAction="#storeResultLeft" text="Store result in left" />
+            <Button mnemonicParsing="false" onAction="#storeResultRight" text="Store result in right" />
         </buttons>
       </ButtonBar>
    </bottom>

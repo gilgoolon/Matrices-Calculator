@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a1ade76e-2417-4169-b19a-7a23a271eaf8" name="Changes" comment="Row Echelon form added, need to fix row switching">
+    <list default="true" id="a1ade76e-2417-4169-b19a-7a23a271eaf8" name="Changes" comment="Fixed row switching and row echelon form">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Controller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/fxml/main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/fxml/main.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/logic/Matrix.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/logic/Matrix.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/logic/MatrixCalculations.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/logic/MatrixCalculations.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,7 +90,7 @@
       <workItem from="1667486722669" duration="14376000" />
       <workItem from="1667502387324" duration="41000" />
       <workItem from="1667542834898" duration="11368000" />
-      <workItem from="1667589749137" duration="1646000" />
+      <workItem from="1667589749137" duration="8222000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <created>1667483487986</created>
@@ -109,7 +113,14 @@
       <option name="project" value="LOCAL" />
       <updated>1667555318411</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Fixed row switching and row echelon form">
+      <created>1667591626298</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1667591626298</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -130,6 +141,7 @@
     <MESSAGE value="First Commit" />
     <MESSAGE value="Structure, methods and files included" />
     <MESSAGE value="Row Echelon form added, need to fix row switching" />
-    <option name="LAST_COMMIT_MESSAGE" value="Row Echelon form added, need to fix row switching" />
+    <MESSAGE value="Fixed row switching and row echelon form" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed row switching and row echelon form" />
   </component>
 </project>

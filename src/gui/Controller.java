@@ -50,7 +50,8 @@ public class Controller {
                 "Invert",
                 "Transpose",
                 "Diagonalize",
-                "Normalize"
+                "Normalize",
+                "Adjoint Matrix"
         };
         _scalarResult = 0;
         _operationChoiceBox.getItems().addAll(items);
@@ -66,8 +67,8 @@ public class Controller {
     private static void numericListener(TextField ... fields) {
         for (TextField field : fields) {
             field.textProperty().addListener((observable, oldValue, newValue) -> {
-                if (!newValue.matches("\\d*")) {
-                    field.setText(newValue.replaceAll("[^\\d]", ""));
+                if (!newValue.matches("^(\\d+(\\.\\d+)?)$")) {
+                    field.setText(newValue.replaceAll("[^(\\d+(E\\-\\+\\.\\d+)?)$]", ""));
                 }
             });
         }
@@ -82,10 +83,13 @@ public class Controller {
         for (GridPane g : grids){
             g.getChildren().clear();
             g.getColumnConstraints().clear();
+            g.getRowConstraints().clear();
             for (int x = 0; x < Integer.parseInt(_widthField.getText()); x++){
                 for (int y = 0; y < Integer.parseInt(_heightField.getText()); y++){
                     TextField t = new TextField();
                     g.add(t,x,y);
+                    if (g == _resultGrid)
+                        t.setEditable(false);
                     formatTextFields(t);
                 }
             }
@@ -97,18 +101,16 @@ public class Controller {
         for(TextField f : fields){
             f.setAlignment(Pos.CENTER);
             f.setText("0");
-            if (f.getParent() == _resultGrid)
-                f.setEditable(false);
-            else numericListener(f);
+            numericListener(f);
         }
     }
 
     private void updateResult(){
         for (int x = 0; x < getWidth(); x++)
             for (int y = 0; y < getHeight(); y++)
-                set(x,y,Utils.formatDouble(_resultMatrix.get(x,y)));
+                set(x,y,Utils.formatDouble(_resultMatrix.get(x,y), false));
 
-        _resultField.setText(Utils.formatDouble(_scalarResult));
+        _resultField.setText(Utils.formatDouble(_scalarResult, false));
     }
 
     private void set(final int x, final int y, String s){
@@ -132,9 +134,18 @@ public class Controller {
             case "Transpose" -> transpose();
             case "Diagonalize" -> diagonalize();
             case "Normalize" -> normalize();
+            case "Adjoint Matrix" -> adjoint();
         }
         
         updateResult();
+    }
+
+    private void adjoint(){
+        try {
+            _resultMatrix = MatrixCalculations.adjoint(Matrix.gptom(_leftGrid));
+        } catch(NonSquareMatrixException e){
+            graphicError(e);
+        }
     }
 
     private void normalize(){
@@ -168,6 +179,22 @@ public class Controller {
     @FXML
     void dimensionsChanged(){
         resetMatrices();
+    }
+
+    @FXML
+    void storeResultRight(){
+        storeResult(false);
+    }
+
+    @FXML
+    void storeResultLeft(){
+        storeResult(true);
+    }
+
+    private void storeResult(boolean isLeft){
+        for (int x = 0; x < (isLeft ? _leftGrid : _rightGrid).getColumnCount(); x++)
+            for (int y = 0; y < (isLeft ? _leftGrid : _rightGrid).getRowCount(); y++)
+                ((TextField) Objects.requireNonNull(Utils.getNodeByCoordinates(x, y, isLeft ? _leftGrid : _rightGrid))).setText(Utils.formatDouble(_resultMatrix.get(x,y), true));
     }
 
     private void multiply() {

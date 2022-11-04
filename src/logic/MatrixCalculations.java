@@ -2,6 +2,7 @@ package logic;
 
 import logic.exceptions.*;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class MatrixCalculations {
@@ -255,7 +256,42 @@ public class MatrixCalculations {
         if (det == 0)
             throw new NonInvertibleMatrixException();
 
-        return multiply(MatrixCalculations.transpose(m), 1/det);
+        return multiply(MatrixCalculations.adjoint(m), 1/det);
+    }
+
+    public static Matrix adjoint(Matrix m) throws NonSquareMatrixException {
+        Matrix result = new Matrix(m);
+        for (int x = 0; x < result.getWidth(); x++)
+            for (int y = 0; y < result.getHeight(); y++)
+                result.set(x, y, Math.pow(-1, x + y) * MatrixCalculations.minor(m, x, y));
+
+        return MatrixCalculations.transpose(result);
+    }
+
+    /**
+     * calculate the determinant of a minor in coordinate (x,y)
+     * @param m represents the matrix operand
+     * @param x represents the x coordinate
+     * @param y represents the y coordinate
+     * @return the determinant of the minor (x,y)
+     * @throws NonSquareMatrixException in case the matrix is not squared and therefore cannot be minored
+     */
+    private static double minor(Matrix m, int x, int y) throws NonSquareMatrixException{
+        Matrix result = new Matrix(m.getWidth() - 1, m.getHeight() - 1);
+
+        int offsetX = 0;
+        for (int i = 0; i < m.getWidth(); i++) {
+            int offsetY = 0;
+            if (i != x) {
+                for (int j = 0; j < m.getHeight(); j++) {
+                    if (j != y){
+                        result.set(i - offsetX, j - offsetY, m.get(i, j));
+                    } else offsetY = 1;
+                }
+            } else offsetX = 1;
+        }
+
+        return MatrixCalculations.det(result);
     }
 
     /**

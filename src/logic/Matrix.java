@@ -123,7 +123,7 @@ public class Matrix {
 
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
-                m.set(x,y,Utils.getInt(x,y,gp));
+                m.set(x,y,Utils.getDouble(x,y,gp));
 
         return m;
     }
