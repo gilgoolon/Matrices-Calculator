@@ -1,4 +1,4 @@
 package logic.exceptions;
 
-public class NonDiagonalizableMatrixException extends Exception {
+public class NonDiagonalizableMatrixException extends MatrixOperationException {
 }

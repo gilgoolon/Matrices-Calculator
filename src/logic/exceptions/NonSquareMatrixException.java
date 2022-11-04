@@ -1,5 +1,5 @@
 package logic.exceptions;
 
-public class NonSquareMatrixException extends Exception{
+public class NonSquareMatrixException extends MatrixOperationException {
 
 }

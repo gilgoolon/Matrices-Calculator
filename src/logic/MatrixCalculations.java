@@ -1,9 +1,8 @@
 package logic;
 
-import logic.exceptions.IncompatibleDimensionsException;
-import logic.exceptions.NonDiagonalizableMatrixException;
-import logic.exceptions.NonInvertibleMatrixException;
-import logic.exceptions.NonSquareMatrixException;
+import logic.exceptions.*;
+
+import java.util.Iterator;
 
 public class MatrixCalculations {
 
@@ -16,25 +15,167 @@ public class MatrixCalculations {
         if (m.getWidth() != m.getHeight())
             throw new NonSquareMatrixException();
 
-        m = MatrixCalculations.canonicalize(m);
-        double result = 1;
+        m = MatrixCalculations.rowEchelonForm(m);
+        double result = m.getExtraValue();
         for (int i = 0; i < m.getHeight(); i++)
             result *= m.get(i,i);
 
         return result;
     }
 
-    //TODO: Write canonicalize() and everything else is smooth sailing
+    // TODO: Need to add and fix row switching elementary operation - do not forget to multiply extraValue by -1
     /**
-     * calculate the canonical form of a given matrix
+     * calculate the row echelon form of a given matrix
      * @param m represents the matrix operand
-     * @return the canonical form of m
+     * @return the row echelon form of m
      */
-    public static Matrix canonicalize(Matrix m){
-        Matrix ans = new Matrix(m.getWidth(), m.getHeight());
-        ans.set(0,0,1);
+    public static Matrix rowEchelonForm(Matrix m){
+        // Using algorithm from file "Algorithm REF" at C:\Users\alper\Downloads\Algorithm REF.pdf
 
-        return ans;
+        // Step 1. Begin with an m × n matrix A. If A = 0, go to Step 7
+        Matrix result = new Matrix(m);
+
+        if (result.isZero())
+            return result;
+
+        for (int pivotRow = 0; pivotRow < result.getHeight(); pivotRow++) {
+            // Step 2. Determine the leftmost non-zero column
+            int leftmostNonZero = 0;
+            for (;leftmostNonZero < result.getWidth(); leftmostNonZero++)
+                if (isNonZeroCol(result, leftmostNonZero, pivotRow))
+                    break;
+            if (leftmostNonZero == result.getWidth())
+                break;
+
+            // Step 3. Use elementary row operations to put a 1 in the topmost position
+            // (we call this position pivot position) of this column
+
+            // store the multiple aside for possible determinant usage
+            result.setExtraValue(result.getExtraValue() * result.get(pivotRow, leftmostNonZero));
+
+            result = MatrixCalculations.elementaryRowOperation1(result, pivotRow, 1 / result.get(pivotRow, leftmostNonZero));
+
+            // Step 4. Use elementary row operations to put zeros (strictly) below the pivot position
+            for (int row = pivotRow + 1; row < result.getHeight(); row++)
+                result = MatrixCalculations.elementaryRowOperation2(result, row, pivotRow, -result.get(leftmostNonZero, row));
+
+            // Step 5. Apply Step 2-4 to the sub-matrix consisting of the rows that lie
+            // (strictly below) the pivot position.
+        }
+        return result;
+    }
+
+    // helper function to check if a column is nonzero from the given indices and onwards
+    private static boolean isNonZeroCol(Matrix m, int x, int y){
+        for (int i = y; i < m.getHeight(); i++)
+            if (m.get(x,i) != 0)
+                return true;
+        return false;
+    }
+
+    /**
+     * operation 1 := multiple * rowToChange
+     * @param m represents the matrix to perform the operation on
+     * @param rowToChange represents the row to change (perform the operation on)
+     * @param multiple represents the multiple of the row
+     * @return the resulting matrix after performed operation 1
+     */
+    public static Matrix elementaryRowOperation1(Matrix m, int rowToChange, double multiple){
+        Matrix result = new Matrix(m);
+
+        for (int x = 0; x < m.getWidth(); x++)
+            result.set(x, rowToChange, result.get(x,rowToChange) * multiple);
+
+        return result;
+    }
+
+    /**
+     * operation 2 := rowToChange + multiple * rowToUse
+     * @param m represents the matrix to perform the operation on
+     * @param rowToChange represents the row to change (perform the operation on)
+     * @param rowToUse represents the row to add (times the multiple) to rowToChange
+     * @param multiple represents the multiple of rowToUse
+     * @return the resulting matrix after performed operation 2
+     */
+    public static Matrix elementaryRowOperation2(Matrix m, int rowToChange, int rowToUse, double multiple){
+        Matrix result = new Matrix(m);
+
+        for (int x = 0; x < result.getWidth(); x++)
+            result.set(x, rowToChange, result.get(x, rowToChange) + multiple * result.get(x, rowToUse));
+
+        return result;
+    }
+
+    /**
+     * calculate the reduced row echelon form of a given matrix
+     * @param m represents the matrix operand
+     * @return the reduced row echelon form of m
+     */
+    public static Matrix reducedRowEchelonForm(Matrix m){
+        // Using algorithm from file "Algorithm REF" at C:\Users\alper\Downloads\Algorithm REF.pdf
+
+        // Step 1. reduce the given matrix to a row echelon form
+        Matrix result = MatrixCalculations.rowEchelonForm(m);
+
+        // Step 2. Determine the right most column containing a leading one (we call
+        // this column pivot column)
+        int pivotCol = result.getWidth() - 1;
+        int pivotRow;
+        for (; pivotCol >= 0; pivotCol--) {
+            if ((pivotRow = isLeadingOne(result, pivotCol)) != -1) {
+                // Step 3. Use type II elementary row operations to erase all the non-zero
+                // entries above the leading one in the pivot column.
+                for (int i = pivotRow - 1; i >= 0; i--)
+                    result = MatrixCalculations.elementaryRowOperation2(result, i, pivotRow, -result.get(pivotCol, i));
+            }
+            // Step 4. Apply Step 2-3 to the sub-matrix consisting of the columns that lie
+            // to the left of the pivot column
+        }
+
+        return result;
+    }
+
+    /**
+     * check if the given column has a leading one
+     * @param m represents the given matrix
+     * @param col represents the column being checked for having a leading one
+     * @return -1 if the given column does not contain a leading one,
+     * and the row index of the one if it does contain a leading one
+     */
+    private static int isLeadingOne(Matrix m, int col){
+        for (int i = m.getHeight() - 1; i >= 0; i--){
+            if (m.get(col, i) != 0){
+                for (int x = col-1; x >= 0; x--)
+                    if (m.get(x, i) != 0)
+                        return -1;
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * calculate the normalized form of a given vector
+     * @param m represents the vector operand
+     * @return the normalized vector |m|
+     * @throws NotAVectorException in case m isn't a vector (height and width are neither 1)
+     */
+    public static Matrix normalize(Matrix m) throws NotAVectorException {
+        Iterator<Double> it = m.iterator();
+        double sum = 0;
+        while (it.hasNext())
+            sum += Math.pow(it.next(), 2);
+
+        double norm = Math.sqrt(sum);
+        Matrix result = new Matrix(m.getWidth(), m.getHeight());
+
+        boolean isWide = m.getWidth() != 1;
+
+        it = m.iterator();
+        for (int i = 0; i < (isWide ? m.getWidth() : m.getHeight()); i++)
+            result.set(isWide ? i : 0, isWide ? 0 : i, it.next()/norm);
+
+        return result;
     }
 
     /**
@@ -144,7 +285,7 @@ public class MatrixCalculations {
         return result;
     }
 
-    //TODO: Write diagonalize(), but dependent on some other function which are needed to be written
+    //TODO: Write diagonalize()
     /**
      * calculates the similar diagonal matrix of m
      * @param m represents the matrix operand

@@ -1,4 +1,4 @@
 package logic.exceptions;
 
-public class IncompatibleDimensionsException extends Exception{
+public class IncompatibleDimensionsException extends MatrixOperationException {
 }

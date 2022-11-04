@@ -1,4 +1,4 @@
 package logic.exceptions;
 
-public class NonInvertibleMatrixException extends Exception {
+public class NonInvertibleMatrixException extends MatrixOperationException {
 }

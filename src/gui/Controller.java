@@ -2,15 +2,14 @@ package gui;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+
 import logic.Matrix;
 import logic.MatrixCalculations;
-import logic.exceptions.IncompatibleDimensionsException;
-import logic.exceptions.NonDiagonalizableMatrixException;
-import logic.exceptions.NonInvertibleMatrixException;
-import logic.exceptions.NonSquareMatrixException;
+import logic.exceptions.*;
 
 import java.util.Objects;
 
@@ -46,14 +45,16 @@ public class Controller {
                 "Subtract",
                 "Multiply",
                 "Determinant",
-                "Canonicalize",
+                "Row Echelon Form",
+                "Reduced Row Echelon Form",
                 "Invert",
                 "Transpose",
-                "Diagonalize"
+                "Diagonalize",
+                "Normalize"
         };
         _scalarResult = 0;
         _operationChoiceBox.getItems().addAll(items);
-        _operationChoiceBox.setValue("Add");
+        _operationChoiceBox.setValue("Reduced Row Echelon Form");
 
         resetMatrices();
         numericListener(_widthField, _heightField);
@@ -105,9 +106,9 @@ public class Controller {
     private void updateResult(){
         for (int x = 0; x < getWidth(); x++)
             for (int y = 0; y < getHeight(); y++)
-                set(x,y,Double.toString(_resultMatrix.get(x,y)));
+                set(x,y,Utils.formatDouble(_resultMatrix.get(x,y)));
 
-        _resultField.setText(Double.toString(_scalarResult));
+        _resultField.setText(Utils.formatDouble(_scalarResult));
     }
 
     private void set(final int x, final int y, String s){
@@ -124,21 +125,31 @@ public class Controller {
             case "Add" -> add();
             case "Subtract" -> subtract();
             case "Multiply" -> multiply();
-            case "Canonicalize" -> canonicalize();
+            case "Row Echelon Form" -> rowEchelonForm();
             case "Determinant" -> determinant();
+            case "Reduced Row Echelon Form" -> reducedRowEchelonForm();
             case "Invert" -> invert();
             case "Transpose" -> transpose();
             case "Diagonalize" -> diagonalize();
+            case "Normalize" -> normalize();
         }
         
         updateResult();
+    }
+
+    private void normalize(){
+        try {
+            _resultMatrix = MatrixCalculations.normalize(Matrix.gptom(_leftGrid));
+        } catch(NotAVectorException e){
+            graphicError(e);
+        }
     }
 
     private void diagonalize(){
         try {
             _resultMatrix = MatrixCalculations.diagonalize(Matrix.gptom(_leftGrid));
         } catch(NonDiagonalizableMatrixException | NonSquareMatrixException e){
-            e.printStackTrace();
+            graphicError(e);
         }
     }
 
@@ -150,7 +161,7 @@ public class Controller {
         try {
             _resultMatrix = MatrixCalculations.invert(Matrix.gptom(_leftGrid));
         } catch (NonInvertibleMatrixException | NonSquareMatrixException e){
-            e.printStackTrace();
+            graphicError(e);
         }
     }
 
@@ -163,7 +174,7 @@ public class Controller {
         try {
             _resultMatrix = MatrixCalculations.multiply(Matrix.gptom(_leftGrid),Matrix.gptom(_rightGrid));
         } catch(IncompatibleDimensionsException e){
-            e.printStackTrace();
+            graphicError(e);
         }
     }
 
@@ -171,15 +182,19 @@ public class Controller {
         _resultMatrix = MatrixCalculations.sub(Matrix.gptom(_leftGrid), Matrix.gptom(_rightGrid));
     }
 
-    private void canonicalize() {
-        _resultMatrix = MatrixCalculations.canonicalize(Matrix.gptom(_leftGrid));
+    private void rowEchelonForm() {
+        _resultMatrix = MatrixCalculations.rowEchelonForm(Matrix.gptom(_leftGrid));
+    }
+
+    private void reducedRowEchelonForm() {
+        _resultMatrix = MatrixCalculations.reducedRowEchelonForm(Matrix.gptom(_leftGrid));
     }
 
     private void determinant() {
         try {
             _scalarResult = MatrixCalculations.det(Matrix.gptom(_leftGrid));
         } catch(NonSquareMatrixException e){
-            e.printStackTrace();
+            graphicError(e);
         }
     }
 
@@ -193,5 +208,12 @@ public class Controller {
 
     private int getHeight(){
         return Integer.parseInt(_heightField.getText());
+    }
+
+    private void graphicError(MatrixOperationException e){
+        Alert a = new Alert(Alert.AlertType.ERROR, "Error");
+        a.setHeaderText("Error: bad input for the current operation");
+        a.setContentText(e.getMessage());
+        a.showAndWait();
     }
 }

@@ -20,4 +20,8 @@ public class Utils {
     public static double getInt(final int x, final int y, final GridPane gp){
         return Double.parseDouble(((TextField) Objects.requireNonNull(Utils.getNodeByCoordinates(x, y, gp))).getText());
     }
+
+    public static String formatDouble(double x){
+        return Double.toString(Math.round(x*1000)/1000.0);
+    }
 }
